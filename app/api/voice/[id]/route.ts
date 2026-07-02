@@ -4,7 +4,7 @@ import prisma from '@/lib/prisma'
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth()
@@ -13,9 +13,11 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    const { id } = await params
+
     const voice = await prisma.voice.findFirst({
       where: {
-        id: params.id,
+        id: id,
         userId: session.user.id,
       },
     })
@@ -24,7 +26,6 @@ export async function DELETE(
       return NextResponse.json({ error: 'Voice not found' }, { status: 404 })
     }
 
-    // Only allow deletion of cloned voices, not default ones
     if (!voice.isClone) {
       return NextResponse.json(
         { error: 'Cannot delete default voices' },
@@ -33,7 +34,7 @@ export async function DELETE(
     }
 
     await prisma.voice.delete({
-      where: { id: params.id },
+      where: { id: id },
     })
 
     return NextResponse.json({ success: true })

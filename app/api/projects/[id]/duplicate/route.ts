@@ -4,7 +4,7 @@ import prisma from '@/lib/prisma'
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }  // ← Changed to Promise
 ) {
   try {
     const session = await auth()
@@ -13,9 +13,12 @@ export async function POST(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    // Await the params
+    const { id } = await params  // ← Added await
+
     const original = await prisma.project.findFirst({
       where: {
-        id: params.id,
+        id: id,  // ← Use the unwrapped id
         userId: session.user.id,
       },
       include: {
