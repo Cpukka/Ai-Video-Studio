@@ -1,4 +1,4 @@
-import { prisma } from '@/lib/prisma'
+import prisma from '@/lib/prisma'
 import { VoiceService } from './voice-service'
 import { tavus } from '@/lib/tavus'
 import { cloudinary } from '@/lib/cloudinary'
