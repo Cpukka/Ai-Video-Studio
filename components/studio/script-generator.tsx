@@ -32,7 +32,10 @@ export function ScriptGenerator({ onComplete }: ScriptGeneratorProps) {
   const [isGenerating, setIsGenerating] = useState(false)
   const [generatedScript, setGeneratedScript] = useState('')
   const [copied, setCopied] = useState(false)
-  const { setScript, script: savedScript } = useStudioStore()
+  
+  // Use selectors instead of destructuring
+  const setScript = useStudioStore((state) => state.setScript)
+  const savedScript = useStudioStore((state) => state.script)
   const { toast } = useToast()
 
   const {

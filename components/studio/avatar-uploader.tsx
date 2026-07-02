@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Label } from '@/components/ui/label'
 import { useToast } from '@/hooks/use-toast'
 import { Loader2, Upload, Image as ImageIcon, Sparkles } from 'lucide-react'
-import { useStudioStore } from '@/store/studio-store'
+import { useStudio } from '@/store/studio-store'
 
 interface AvatarUploaderProps {
   onComplete: () => void
@@ -18,7 +18,10 @@ export function AvatarUploader({ onComplete }: AvatarUploaderProps) {
   const [isGenerating, setIsGenerating] = useState(false)
   const [selectedImage, setSelectedImage] = useState<File | null>(null)
   const [previewUrl, setPreviewUrl] = useState('')
-  const { setAvatar, avatarUrl: savedAvatarUrl } = useStudioStore()
+  
+  const store = useStudio()
+  const setAvatar = store((state) => state.setAvatar)
+  const savedAvatarUrl = store((state) => state.avatarUrl)
   const { toast } = useToast()
 
   const handleImageUpload = (file: File) => {

@@ -5,18 +5,21 @@ import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
-import { Slider } from '@/components/ui/slider'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Settings, Video, Subtitles, Maximize } from 'lucide-react'
-import { useStudioStore } from '@/store/studio-store'
+import { useStudio } from '@/store/studio-store'
 
 interface GenerationControlsProps {
   isReady?: boolean
 }
 
 export function GenerationControls({ isReady = false }: GenerationControlsProps) {
-  const { settings, setSetting } = useStudioStore()
+  const store = useStudio()
   const [isOpen, setIsOpen] = useState(false)
+
+  // Get state and actions
+  const settings = store((state) => state.settings)
+  const setSetting = store((state) => state.setSetting)
 
   if (!isOpen) {
     return (

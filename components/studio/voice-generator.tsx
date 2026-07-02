@@ -36,7 +36,9 @@ export function VoiceGenerator({ onComplete }: VoiceGeneratorProps) {
     speed: 1.0,
   })
   
-  const { setVoice, voiceId: savedVoiceId } = useStudioStore()
+  // Use selectors correctly
+  const setVoice = useStudioStore((state) => state.setVoice)
+  const savedVoiceId = useStudioStore((state) => state.voiceId)
   const { toast } = useToast()
 
   useEffect(() => {

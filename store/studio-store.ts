@@ -1,6 +1,5 @@
-import { createStore } from 'zustand/vanilla'
+import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import { useStore } from 'zustand'
 
 interface StudioState {
   script: string
@@ -30,7 +29,8 @@ interface StudioState {
   setProgress: (progress: number) => void
 }
 
-const studioStore = createStore<StudioState>()(
+// Create the store
+const studioStore = create<StudioState>()(
   persist(
     (set) => ({
       script: '',
@@ -87,4 +87,20 @@ const studioStore = createStore<StudioState>()(
   )
 )
 
-export const useStudioStore = <T>(selector: (state: StudioState) => T) => useStore(studioStore, selector)
+// Export both the selector hook and the direct hook
+export const useStudioStore = <T>(selector: (state: StudioState) => T) => {
+  const store = studioStore
+  return store(selector)
+}
+
+// Add a direct hook for components that want to destructure
+export const useStudioState = () => {
+  const store = studioStore
+  return store.getState()
+}
+
+// For components that need to subscribe to all state changes
+export const useStudio = () => {
+  const store = studioStore
+  return store
+}

@@ -17,7 +17,12 @@ interface Video {
 }
 
 export function VideoPreview() {
-  const { script, voiceId, avatarUrl, settings } = useStudioStore()
+  // Use selectors instead of destructuring
+  const script = useStudioStore((state) => state.script)
+  const voiceId = useStudioStore((state) => state.voiceId)
+  const avatarUrl = useStudioStore((state) => state.avatarUrl)
+  const settings = useStudioStore((state) => state.settings)
+  
   const [video, setVideo] = useState<Video | null>(null)
   const [isGenerating, setIsGenerating] = useState(false)
   const [isPlaying, setIsPlaying] = useState(false)

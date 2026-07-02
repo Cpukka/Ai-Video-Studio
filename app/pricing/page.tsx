@@ -192,8 +192,11 @@ export default function PricingPage() {
                           ${isAnnual ? plan.price.annual : plan.price.monthly}
                         </span>
                         <span className="text-muted-foreground">/month</span>
-                        {isAnnual && (
-                          <p className="text-sm text-green-500 mt-1">Billed annually (${plan.price.annual * 12}/year)</p>
+                        {/* Fixed: Check type before arithmetic */}
+                        {isAnnual && typeof plan.price.annual === 'number' && (
+                          <p className="text-sm text-green-500 mt-1">
+                            Billed annually (${plan.price.annual * 12}/year)
+                          </p>
                         )}
                       </>
                     ) : (
