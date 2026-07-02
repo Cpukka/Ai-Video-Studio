@@ -10,7 +10,7 @@ import { AnalyticsCard } from '@/components/dashboard/analytics-card'
 import { RecentVideos } from '@/components/dashboard/recent-videos'
 import { QuickActions } from '@/components/dashboard/quick-actions'
 import { UsageStats } from '@/components/dashboard/usage-stats'
-import { FiVideo, FiMic, FiClock, FiTrendingUp, FiHome } from 'react-icons/fi'
+import { Video, Mic, Clock, TrendingUp, Home } from 'lucide-react'  // ← Lucide icons
 
 export default function DashboardPage() {
   const { data: session } = useSession()
@@ -60,10 +60,9 @@ export default function DashboardPage() {
           </p>
         </div>
         
-        {/* Homepage Link Button */}
         <Link href="/">
           <Button variant="outline" size="sm" className="gap-2">
-            <FiHome className="h-4 w-4" />
+            <Home className="h-4 w-4" />
             Back to Home
           </Button>
         </Link>
@@ -73,28 +72,28 @@ export default function DashboardPage() {
         <AnalyticsCard
           title="Total Videos"
           value={stats.totalVideos}
-          icon={FiVideo}
+          icon={Video}
           trend="+12%"
           trendUp={true}
         />
         <AnalyticsCard
           title="Minutes Generated"
           value={stats.totalMinutes}
-          icon={FiClock}
+          icon={Clock}
           trend="+8%"
           trendUp={true}
         />
         <AnalyticsCard
           title="Credits Left"
           value={stats.creditsLeft}
-          icon={FiMic}
+          icon={Mic}
           trend="-5%"
           trendUp={false}
         />
         <AnalyticsCard
           title="Growth Rate"
           value={`${stats.growth}%`}
-          icon={FiTrendingUp}
+          icon={TrendingUp}
           trend="+2%"
           trendUp={true}
         />
