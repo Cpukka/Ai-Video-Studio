@@ -61,8 +61,15 @@ export async function PUT(req: NextRequest) {
     console.error('Failed to update profile:', error)
     
     if (error instanceof z.ZodError) {
+      // Fix: Use error.issues instead of error.errors
       return NextResponse.json(
-        { error: 'Validation failed', details: error.errors },
+        { 
+          error: 'Validation failed', 
+          details: error.issues.map((issue) => ({
+            field: issue.path.join('.'),
+            message: issue.message,
+          }))
+        }, 
         { status: 400 }
       )
     }
