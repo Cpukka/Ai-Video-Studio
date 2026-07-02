@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
+import { auth } from '@/lib/auth'  // ← Changed from getServerSession/authOptions
+import prisma from '@/lib/prisma'  // ← Changed from { prisma }
 import { VideoService } from '@/services/video-service'
 import { z } from 'zod'
 
@@ -19,8 +18,9 @@ const videoSchema = z.object({
 
 export async function POST(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
-    if (!session) {
+    // Use modern auth() instead of getServerSession
+    const session = await auth()
+    if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -59,7 +59,10 @@ export async function POST(req: NextRequest) {
     })
 
     // Start async video generation
-    VideoService.generateVideo(video.id, validatedData).catch(console.error)
+    VideoService.generateVideo(video.id, {
+      ...validatedData,
+      userId: session.user.id,
+    }).catch(console.error)
 
     // Deduct credits
     await prisma.user.update({
@@ -88,8 +91,8 @@ export async function POST(req: NextRequest) {
 
 export async function GET(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
-    if (!session) {
+    const session = await auth()
+    if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -119,6 +122,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json(videos)
   } catch (error) {
+    console.error('Failed to fetch videos:', error)
     return NextResponse.json(
       { error: 'Failed to fetch videos' },
       { status: 500 }

@@ -1,7 +1,9 @@
+// services/video-service.ts
+
 import prisma from '@/lib/prisma'
 import { VoiceService } from './voice-service'
 import { tavus } from '@/lib/tavus'
-import { cloudinary } from '@/lib/cloudinary'
+import { cloudinary, uploadToCloudinary } from '@/lib/cloudinary'  // ← Updated import
 import { exec } from 'child_process'
 import { promisify } from 'util'
 import ffmpeg from 'ffmpeg-static'
@@ -45,7 +47,7 @@ export class VideoService {
       }
 
       // Upload to Cloudinary
-      const uploadResult = await cloudinary.uploader.upload(finalVideoUrl, {
+      const uploadResult = await uploadToCloudinary(finalVideoUrl, {
         resource_type: 'video',
         folder: 'ai-avatar-videos',
         public_id: videoId,
@@ -95,11 +97,10 @@ export class VideoService {
   }
 
   static generateSRT(script: string): string {
-    // Simple SRT generation based on word count
     const words = script.split(' ')
-    const duration = words.length * 0.3 // Rough estimate
+    const duration = words.length * 0.3
     const chunks = []
-    const chunkSize = 15 // Words per subtitle
+    const chunkSize = 15
     
     for (let i = 0; i < words.length; i += chunkSize) {
       const chunk = words.slice(i, i + chunkSize).join(' ')

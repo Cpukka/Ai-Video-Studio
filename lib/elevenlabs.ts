@@ -1,16 +1,8 @@
 // lib/elevenlabs.ts
 
-// If using ElevenLabs Node.js SDK
-// First install: npm install elevenlabs-node
+// Using fetch directly (no SDK needed)
+// No installation required - uses native fetch
 
-// Option 1: Using the official SDK
-import { ElevenLabsClient } from 'elevenlabs-node'
-
-export const elevenlabs = new ElevenLabsClient({
-  apiKey: process.env.ELEVENLABS_API_KEY || '',
-})
-
-// Option 2: Using fetch directly (if you prefer not to use SDK)
 export const elevenlabs = {
   async textToSpeech(voiceId: string, options: {
     text: string
@@ -20,63 +12,84 @@ export const elevenlabs = {
       similarity_boost: number
     }
   }) {
-    const response = await fetch(
-      `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'xi-api-key': process.env.ELEVENLABS_API_KEY!,
-        },
-        body: JSON.stringify({
-          text: options.text,
-          model_id: options.model_id || 'eleven_monolingual_v1',
-          voice_settings: options.voice_settings || {
-            stability: 0.5,
-            similarity_boost: 0.75,
+    try {
+      const response = await fetch(
+        `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'xi-api-key': process.env.ELEVENLABS_API_KEY!,
           },
-        }),
+          body: JSON.stringify({
+            text: options.text,
+            model_id: options.model_id || 'eleven_monolingual_v1',
+            voice_settings: options.voice_settings || {
+              stability: 0.5,
+              similarity_boost: 0.75,
+            },
+          }),
+        }
+      )
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        throw new Error(`ElevenLabs API error (${response.status}): ${errorText}`)
       }
-    )
 
-    if (!response.ok) {
-      throw new Error(`ElevenLabs API error: ${response.statusText}`)
+      return response.body // Returns a ReadableStream
+    } catch (error) {
+      console.error('ElevenLabs textToSpeech error:', error)
+      throw error
     }
-
-    return response.body // Returns a ReadableStream
   },
 
   async cloneVoice(name: string, audioFile: File) {
-    const formData = new FormData()
-    formData.append('name', name)
-    formData.append('files', audioFile)
+    try {
+      const formData = new FormData()
+      formData.append('name', name)
+      formData.append('files', audioFile)
 
-    const response = await fetch('https://api.elevenlabs.io/v1/voices/add', {
-      method: 'POST',
-      headers: {
-        'xi-api-key': process.env.ELEVENLABS_API_KEY!,
-      },
-      body: formData,
-    })
+      const response = await fetch('https://api.elevenlabs.io/v1/voices/add', {
+        method: 'POST',
+        headers: {
+          'xi-api-key': process.env.ELEVENLABS_API_KEY!,
+        },
+        body: formData,
+      })
 
-    if (!response.ok) {
-      throw new Error(`Voice cloning failed: ${response.statusText}`)
+      if (!response.ok) {
+        const errorText = await response.text()
+        throw new Error(`Voice cloning failed (${response.status}): ${errorText}`)
+      }
+
+      return response.json()
+    } catch (error) {
+      console.error('ElevenLabs cloneVoice error:', error)
+      throw error
     }
-
-    return response.json()
   },
 
   async getVoices() {
-    const response = await fetch('https://api.elevenlabs.io/v1/voices', {
-      headers: {
-        'xi-api-key': process.env.ELEVENLABS_API_KEY!,
-      },
-    })
+    try {
+      const response = await fetch('https://api.elevenlabs.io/v1/voices', {
+        headers: {
+          'xi-api-key': process.env.ELEVENLABS_API_KEY!,
+        },
+      })
 
-    if (!response.ok) {
-      throw new Error(`Failed to fetch voices: ${response.statusText}`)
+      if (!response.ok) {
+        const errorText = await response.text()
+        throw new Error(`Failed to fetch voices (${response.status}): ${errorText}`)
+      }
+
+      return response.json()
+    } catch (error) {
+      console.error('ElevenLabs getVoices error:', error)
+      return { voices: [] } // Return empty array on error
     }
-
-    return response.json()
   },
 }
+
+// Default export for convenience
+export default elevenlabs
