@@ -13,7 +13,12 @@ import { useStudioStore } from '@/store/studio-store'
 
 export default function StudioPage() {
   const [activeTab, setActiveTab] = useState('script')
-  const { script, voiceId, avatarUrl, isGenerating } = useStudioStore()
+  
+  // Use selectors to get individual state values
+  const script = useStudioStore((state) => state.script)
+  const voiceId = useStudioStore((state) => state.voiceId)
+  const avatarUrl = useStudioStore((state) => state.avatarUrl)
+  const isGenerating = useStudioStore((state) => state.isGenerating)
 
   return (
     <Container className="py-8">
