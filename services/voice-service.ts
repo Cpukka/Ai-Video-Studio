@@ -1,5 +1,5 @@
 import { elevenlabs } from '@/lib/elevenlabs'
-import { prisma } from '@/lib/prisma'
+import  prisma from '@/lib/prisma'
 
 export class VoiceService {
   static async generateSpeech(text: string, voiceId: string, userId: string) {
