@@ -23,17 +23,29 @@ export async function GET() {
       },
     })
 
+    // Early return if user not found
+    if (!user) {
+      return NextResponse.json(
+        { error: 'User not found' },
+        { status: 404 }
+      )
+    }
+
     const planLimits = {
       FREE: { minutes: 60, credits: 100 },
       PRO: { minutes: 500, credits: 1000 },
       ENTERPRISE: { minutes: 5000, credits: 10000 },
     }
 
-    const limits = planLimits[user?.plan as keyof typeof planLimits] || planLimits.FREE
+    const limits = planLimits[user.plan as keyof typeof planLimits] || planLimits.FREE
 
-    const totalVideos = user?.videos.length || 0
-    const minutesUsed = user?.videos.reduce((acc, video) => acc + (video.duration || 0), 0) / 60
-    const creditsUsed = limits.credits - (user?.credits || 0)
+    // Now user is guaranteed to exist
+    const totalVideos = user.videos.length
+    const minutesUsed = user.videos.reduce(
+      (acc, video) => acc + (video.duration || 0),
+      0
+    ) / 60
+    const creditsUsed = limits.credits - user.credits
 
     return NextResponse.json({
       totalVideos,

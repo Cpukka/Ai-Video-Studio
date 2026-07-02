@@ -17,9 +17,21 @@ export async function GET() {
       },
     })
 
-    const totalVideos = user?.videos.length || 0
-    const totalMinutes = user?.videos.reduce((acc, video) => acc + (video.duration || 0), 0) / 60
-    const creditsLeft = user?.credits || 0
+    // Early return if user not found
+    if (!user) {
+      return NextResponse.json(
+        { error: 'User not found' },
+        { status: 404 }
+      )
+    }
+
+    // Now user is guaranteed to exist
+    const totalVideos = user.videos.length
+    const totalMinutes = user.videos.reduce(
+      (acc, video) => acc + (video.duration || 0),
+      0
+    ) / 60
+    const creditsLeft = user.credits
 
     return NextResponse.json({
       totalVideos,
