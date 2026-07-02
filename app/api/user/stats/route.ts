@@ -25,12 +25,15 @@ export async function GET() {
       )
     }
 
-    // Now user is guaranteed to exist
+    // Now TypeScript knows user exists, so we can safely access properties
     const totalVideos = user.videos.length
+    
+    // Use nullish coalescing for safety if videos array is empty
     const totalMinutes = user.videos.reduce(
-      (acc, video) => acc + (video.duration || 0),
+      (acc, video) => acc + (video.duration ?? 0),
       0
     ) / 60
+    
     const creditsLeft = user.credits
 
     return NextResponse.json({

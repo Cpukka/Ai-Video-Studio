@@ -37,12 +37,12 @@ export async function GET() {
       ENTERPRISE: { minutes: 5000, credits: 10000 },
     }
 
+    // Now TypeScript knows user exists
     const limits = planLimits[user.plan as keyof typeof planLimits] || planLimits.FREE
 
-    // Now user is guaranteed to exist
     const totalVideos = user.videos.length
     const minutesUsed = user.videos.reduce(
-      (acc, video) => acc + (video.duration || 0),
+      (acc, video) => acc + (video.duration ?? 0),
       0
     ) / 60
     const creditsUsed = limits.credits - user.credits

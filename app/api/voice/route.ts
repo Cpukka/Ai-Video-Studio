@@ -78,7 +78,17 @@ export async function POST(req: NextRequest) {
     console.error('Failed to create voice:', error)
     
     if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: error.errors }, { status: 400 })
+      // Fix: Use error.issues instead of error.errors
+      return NextResponse.json(
+        { 
+          error: 'Validation failed', 
+          details: error.issues.map((issue) => ({
+            field: issue.path.join('.'),
+            message: issue.message,
+          }))
+        }, 
+        { status: 400 }
+      )
     }
     
     return NextResponse.json(
