@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { auth } from '@/lib/auth'  // ← Changed from getServerSession/authOptions
-import prisma from '@/lib/prisma'  // ← Changed from { prisma }
+import { auth } from '@/lib/auth'
+import prisma from '@/lib/prisma'
 import { VideoService } from '@/services/video-service'
 import { z } from 'zod'
 
@@ -79,7 +79,17 @@ export async function POST(req: NextRequest) {
     console.error('Video generation error:', error)
     
     if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: error.errors }, { status: 400 })
+      // Fix: Use error.issues instead of error.errors
+      return NextResponse.json(
+        { 
+          error: 'Validation failed', 
+          details: error.issues.map((issue) => ({
+            field: issue.path.join('.'),
+            message: issue.message,
+          }))
+        }, 
+        { status: 400 }
+      )
     }
     
     return NextResponse.json(

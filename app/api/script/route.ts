@@ -14,7 +14,7 @@ const scriptSchema = z.object({
 export async function POST(req: NextRequest) {
   try {
     const session = await auth()
-    if (!session) {
+    if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -44,12 +44,32 @@ To enable real AI script generation, add your ANTHROPIC_API_KEY to .env.local`
       data: { credits: { decrement: 1 } }
     })
 
+    // Log API usage
+    await prisma.aPIUsage.create({
+      data: {
+        userId: session.user.id,
+        endpoint: '/api/script',
+        method: 'POST',
+        status: 200,
+      }
+    })
+
     return NextResponse.json({ script: mockScript })
   } catch (error) {
     console.error('Script generation error:', error)
     
     if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: error.errors }, { status: 400 })
+      // Use error.issues instead of error.errors
+      return NextResponse.json(
+        { 
+          error: 'Validation failed', 
+          details: error.issues.map((issue) => ({
+            field: issue.path.join('.'),
+            message: issue.message,
+          }))
+        }, 
+        { status: 400 }
+      )
     }
     
     return NextResponse.json(
