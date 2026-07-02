@@ -1,0 +1,182 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+
+datasource db {
+  provider = "postgresql"
+  
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String?
+  password      String?   // Null for OAuth users
+  image         String?
+  emailVerified DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relationships
+  projects      Project[]
+  videos        Video[]
+  voices        Voice[]
+  avatars       Avatar[]
+  subscription  Subscription?
+  payments      Payment[]
+  apiUsage      APIUsage[]
+
+  // Account info
+  credits       Int       @default(10) // Free credits
+  plan          PlanType  @default(FREE)
+  role          Role      @default(USER)
+}
+
+model Project {
+  id          String    @id @default(cuid())
+  name        String
+  description String?
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  videos      Video[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Studio data
+  script      String?
+  voiceId     String?
+  avatarId    String?
+  status      ProjectStatus @default(DRAFT)
+}
+
+model Video {
+  id          String    @id @default(cuid())
+  title       String
+  description String?
+  url         String?
+  thumbnail   String?
+  duration    Int?      // in seconds
+  status      VideoStatus @default(PROCESSING)
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  projectId   String?
+  project     Project?  @relation(fields: [projectId], references: [id])
+  script      String?
+  voiceId     String?
+  avatarId    String?
+  subtitles   Json?     // Store subtitle data
+  metadata    Json?     // Additional metadata
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+   @@index([createdAt])  // Time-based queries
+  @@map("videos_2024")  // Shard by year
+}
+
+model Voice {
+  id          String    @id @default(cuid())
+  name        String
+  description String?
+  voiceId     String    // External service voice ID
+  isClone     Boolean   @default(false)
+  userId      String?
+  user        User?     @relation(fields: [userId], references: [id])
+  previewUrl  String?
+  settings    Json?     // Voice settings (stability, similarity, etc.)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Avatar {
+  id          String    @id @default(cuid())
+  name        String
+  imageUrl    String
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  isPublic    Boolean   @default(false)
+  settings    Json?     // Avatar settings
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Subscription {
+  id            String          @id @default(cuid())
+  userId        String          @unique
+  user          User            @relation(fields: [userId], references: [id])
+  stripeCustomerId String?
+  stripeSubscriptionId String?
+  plan          PlanType        @default(FREE)
+  status        SubscriptionStatus @default(ACTIVE)
+  currentPeriodStart DateTime?
+  currentPeriodEnd   DateTime?
+  cancelAtPeriodEnd  Boolean     @default(false)
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+}
+
+model Payment {
+  id            String    @id @default(cuid())
+  userId        String
+  user          User      @relation(fields: [userId], references: [id])
+  stripePaymentIntentId String?
+  amount        Int       // in cents
+  currency      String    @default("usd")
+  status        PaymentStatus @default(PENDING)
+  receiptUrl    String?
+  createdAt     DateTime  @default(now())
+}
+
+model APIUsage {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id])
+  endpoint    String
+  method      String
+  status      Int
+  responseTime Int?     // in ms
+  ipAddress   String?
+  createdAt   DateTime  @default(now())
+}
+
+enum PlanType {
+  FREE
+  PRO
+  ENTERPRISE
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum ProjectStatus {
+  DRAFT
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+enum VideoStatus {
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  INCOMPLETE
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCEEDED
+  FAILED
+}
