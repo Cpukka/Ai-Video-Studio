@@ -15,11 +15,16 @@ export async function PUT(
 
     const { id } = await params
     const body = await req.json()
-    const { role, plan, credits, status } = body
+    const { role, plan, credits } = body  // ← Removed 'status'
 
     const updated = await prisma.user.update({
       where: { id: id },
-      data: { role, plan, credits, status },
+      data: { 
+        role, 
+        plan, 
+        credits 
+        // 'status' removed - not in schema
+      },
     })
 
     return NextResponse.json(updated)
