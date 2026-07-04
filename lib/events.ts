@@ -1,6 +1,18 @@
-import type { Prisma } from '@prisma/client'
+import  PrismaClient from '@prisma/client'
 
-type Video = Prisma.VideoGetPayload<{}>
+// Define Video type using Prisma's generated types
+type Video = {
+  id: string
+  userId: string
+  title: string
+  status: string
+  url?: string | null
+  thumbnail?: string | null
+  duration?: number | null
+  createdAt: Date
+  updatedAt: Date
+  [key: string]: any
+}
 
 export class EventEmitter {
   async videoCreated(video: Video) {
