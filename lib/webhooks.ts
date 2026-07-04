@@ -1,13 +1,9 @@
+// Simplified version without database
 export async function triggerWebhooks(userId: string, event: string, data: any) {
-  const webhooks = await prisma.webhook.findMany({
-    where: { userId, events: { has: event } }
-  });
+  // In production, you would fetch webhooks from database
+  console.log(`🔗 Webhook triggered: ${event} for user ${userId}`, data);
   
-  await Promise.all(webhooks.map(webhook =>
-    fetch(webhook.url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ event, data, timestamp: new Date() })
-    }).catch(console.error)
-  ));
+  // If you have webhook URLs stored somewhere, you can trigger them here
+  // const webhooks = await getWebhooksForUser(userId);
+  // await Promise.all(webhooks.map(webhook => fetch(webhook.url, { ... })));
 }

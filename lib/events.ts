@@ -1,4 +1,4 @@
-import  PrismaClient from '@prisma/client'
+import { PrismaClient } from '../generated/prisma/client'
 
 // Define Video type using Prisma's generated types
 type Video = {
