@@ -28,8 +28,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           throw new Error("Invalid credentials")
         }
 
+        const email = credentials.email as string
+        const password = credentials.password as string
+
         const user = await prisma.user.findUnique({
-          where: { email: credentials.email }
+          where: { email: email }
         })
 
         if (!user || !user.password) {
@@ -37,7 +40,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         }
 
         const isCorrectPassword = await bcrypt.compare(
-          credentials.password,
+          password,
           user.password
         )
 
@@ -59,10 +62,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.id = user.id
-        token.role = user.role
-        token.credits = user.credits
-        token.plan = user.plan
+        // Fix: Use type assertions to ensure these are strings
+        token.id = user.id as string
+        token.role = user.role as string
+        token.credits = user.credits as number
+        token.plan = user.plan as string
       }
       return token
     },
