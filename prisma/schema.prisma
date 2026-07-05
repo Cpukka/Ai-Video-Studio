@@ -75,6 +75,7 @@ model Video {
   metadata    Json?     // Additional metadata
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
+  completedAt DateTime?
    @@index([createdAt])  // Time-based queries
   @@map("videos_2024")  // Shard by year
 }
@@ -83,7 +84,7 @@ model Voice {
   id          String    @id @default(cuid())
   name        String
   description String?
-  voiceId     String    // External service voice ID
+  voiceId     String   @unique
   isClone     Boolean   @default(false)
   userId      String?
   user        User?     @relation(fields: [userId], references: [id])

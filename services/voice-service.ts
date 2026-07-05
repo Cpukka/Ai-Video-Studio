@@ -1,5 +1,5 @@
 import { elevenlabs } from '@/lib/elevenlabs'
-import  prisma from '@/lib/prisma'
+import prisma from '@/lib/prisma'
 
 export class VoiceService {
   static async generateSpeech(text: string, voiceId: string, userId: string) {
@@ -13,11 +13,27 @@ export class VoiceService {
         },
       })
 
-      // Convert stream to buffer
+      // Convert stream to buffer - using getReader() for better compatibility
       const chunks: Uint8Array[] = []
-      for await (const chunk of response) {
-        chunks.push(chunk)
+      
+      // Handle both ReadableStream and async iterable
+      if (response && typeof response.getReader === 'function') {
+        // Use getReader() for ReadableStream
+        const reader = response.getReader()
+        while (true) {
+          const { done, value } = await reader.read()
+          if (done) break
+          chunks.push(value)
+        }
+      } else if (response && Symbol.asyncIterator in response) {
+        // Fallback for async iterable
+        for await (const chunk of response as any) {
+          chunks.push(chunk)
+        }
+      } else {
+        throw new Error('Unexpected response format from ElevenLabs')
       }
+
       const audioBuffer = Buffer.concat(chunks)
 
       // Upload to Cloudinary
